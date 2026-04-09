@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        STACK_NAME = "nikbsoft-backend-srvr-asg-stack-dev"
+        REGION = "us-east-1"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/thejeswarr6/nikbsoft-awscf-infra.git',
+                    credentialsId: 'github-cred'
+            }
+        }
+        stage('Debug Files') {
+       steps {
+               sh '''
+                 pwd
+                 ls -la
+                  '''
+              }
+           }
+        stage('Validate Template') {
+            steps {
+                withAWS(credentials: 'aws-cred', region: "${REGION}") {
+                    sh '''
+                    aws cloudformation validate-template \
+                      --template-body file://EC2-Backend-ASG/main.json
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Stack') {
+            steps {
+                withAWS(credentials: 'aws-cred', region: "${REGION}") {
+                    sh '''
+                    cd EC2-Backend-ASG
+                    aws cloudformation deploy \
+                      --stack-name $STACK_NAME \
+                      --template-file main.json \
+                      --parameter-overrides $(cat dev.parameters.json | jq -r 'to_entries|map("\\(.key)=\\(.value|tostring)")|.[]') \
+                      --capabilities CAPABILITY_NAMED_IAM
+                    '''
+                }
+            }
+        }
+    }
+}

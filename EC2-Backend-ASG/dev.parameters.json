@@ -1,0 +1,14 @@
+{
+  "Environment": "dev",
+  "ServiceName": "nikbsoft-backend",
+  "VpcId": "vpc-06a98ae800a6d7b2f",
+  "SubnetId1A": "subnet-0e52891d58f9ddb2f",
+  "SubnetId1B": "subnet-01c277af5daee818b",
+  "SecurityGroupId": "sg-016f7ff6b60b8f903",
+  "KeyPairName": "nikbsoft-key",
+  "AmiId": "ami-0ec10929233384c7f",
+  "InstanceType": "t3.micro",
+  "MinSize": "1",
+  "MaxSize": "1",
+  "DesiredCapacity": "1"
+}

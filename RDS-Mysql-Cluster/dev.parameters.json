@@ -1,0 +1,12 @@
+{
+   "Environment": "dev",
+  "ServiceName": "nikbsoft-mysql-db",
+  "DBUsername": "nikbsoft-mysql-user",
+  "DBInstanceClass": "db.t3.micro",
+  "AllocatedStorage": 20,
+  "EngineVersion": "8.0",
+  "VpcId": "vpc-06a98ae800a6d7b2f",
+  "SubnetId1A": "subnet-0e52891d58f9ddb2f",
+  "SubnetId1B": "subnet-01c277af5daee818b",
+  "DBSecurityGroup": "sg-005595c365f1cfdbd"
+}

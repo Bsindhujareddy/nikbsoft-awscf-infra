@@ -1,0 +1,106 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "RDS MySQL db instance",
+
+  "Parameters": {
+    "Environment": { 
+      "Type": "String",
+      "Default": ""
+     },
+    "ServiceName": { 
+      "Type": "String",
+      "Default": ""
+    },
+    "DBUsername": { 
+      "Type": "String",
+      "Default": ""
+     },
+    "DBInstanceClass": { 
+      "Type": "String",
+      "Default": ""
+     },
+    "AllocatedStorage": { 
+      "Type": "Number",
+      "Default": 10
+    },
+    "EngineVersion": { 
+      "Type": "String",
+      "Default": ""
+     },
+    "VpcId": { 
+      "Type": "String",
+      "Default": ""
+    },
+    "SubnetId1A": {
+      "Type": "String",
+      "Default": ""
+    },
+     "SubnetId1B": {
+      "Type": "String",
+      "Default": ""
+    },
+    "DBSecurityGroup": {
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Resources": {
+
+    "DBSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Name": { "Fn::Sub": "${ServiceName}-rds-secret-${Environment}" },
+        "GenerateSecretString": {
+          "SecretStringTemplate": {
+            "Fn::Sub": "{\"username\":\"${DBUsername}\"}"
+          },
+          "GenerateStringKey": "password",
+          "PasswordLength": 16,
+          "ExcludeCharacters": "\"@/\\"
+        }
+      }
+    },
+
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Subnet group for RDS",
+        "SubnetIds": [ { "Ref": "SubnetId1A" },{ "Ref": "SubnetId1B" }]
+      }
+    },
+
+    "MyDBInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBInstanceIdentifier": { "Fn::Sub": "${ServiceName}-rds-${Environment}" },
+        "Engine": "mysql",
+        "EngineVersion": { "Ref": "EngineVersion" },
+        "DBInstanceClass": { "Ref": "DBInstanceClass" },
+        "AllocatedStorage": { "Ref": "AllocatedStorage" },
+        "MasterUsername": {
+          "Fn::Sub": "{{resolve:secretsmanager:${DBSecret}:SecretString:username}}"
+        },
+        "MasterUserPassword": {
+          "Fn::Sub": "{{resolve:secretsmanager:${DBSecret}:SecretString:password}}"
+        },
+        "VPCSecurityGroups": [
+          { "Ref": "DBSecurityGroup" }
+        ],
+        "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
+        "PubliclyAccessible": true,
+        "MultiAZ": false,
+        "StorageType": "gp2",
+        "DeletionProtection": false
+      }
+    }
+  },
+
+  "Outputs": {
+    "DBEndpoint": {
+      "Value": { "Fn::GetAtt": ["MyDBInstance", "Endpoint.Address"] }
+    },
+    "SecretName": {
+      "Value": { "Ref": "DBSecret" }
+    }
+  }
+}

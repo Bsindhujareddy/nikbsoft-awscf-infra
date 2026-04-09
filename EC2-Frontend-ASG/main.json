@@ -1,0 +1,171 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "ASG for nikbsoft frontend server",
+
+  "Parameters": {
+     "Environment": {
+      "Type": "String",
+      "Default": ""
+    },
+    "ServiceName": {
+      "Type": "String",
+      "Default": ""
+    },
+    "VpcId": {
+      "Type": "String",
+      "Default": ""
+    },
+    "SubnetId1A": {
+      "Type": "String",
+      "Default": ""
+    },
+     "SubnetId1B": {
+      "Type": "String",
+      "Default": ""
+    },
+    "SecurityGroupId": {
+      "Type": "String",
+      "Default": ""
+    },
+    "KeyPairName": {
+      "Type": "String",
+      "Default": "nikbsoft-key"
+    },
+    "AmiId": {
+      "Type": "String",
+      "Default": "ami-0ec10929233384c7"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "t3.micro"
+    },
+    "MinSize": {
+      "Type": "Number",
+      "Default": 1
+    },
+    "MaxSize": {
+      "Type": "Number",
+      "Default": 3
+    },
+    "DesiredCapacity": {
+      "Type": "Number",
+      "Default": 2
+    }
+  },
+
+  "Resources": {
+
+    "EC2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                "nikbsoft-frontend-ec2-role-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": ["ec2.amazonaws.com"]
+              },
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ]
+      }
+    },
+
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          { "Ref": "EC2Role" }
+        ]
+      }
+    },
+
+    "LaunchTemplate": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                "nikbsoft-frontend-launch-template-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+        "LaunchTemplateData": {
+          "ImageId": { "Ref": "AmiId" },
+          "InstanceType": { "Ref": "InstanceType" },
+          "KeyName": { "Ref": "KeyPairName" },
+          "SecurityGroupIds": [
+            { "Ref": "SecurityGroupId" }
+          ],
+          "IamInstanceProfile": {
+            "Name": { "Ref": "InstanceProfile" }
+          },
+          "UserData": {
+            "Fn::Base64": "#!/bin/bash\nyum update -y\n"
+          }
+        }
+      }
+    },
+
+    "AutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName":  {
+                      "Fn::Join": [
+                        "",
+                             [
+                                "nikbsoft-frontend-srvr-asg-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+        "VPCZoneIdentifier":[ { "Ref": "SubnetId1A" },{ "Ref": "SubnetId1B" }],
+        "MinSize": { "Ref": "MinSize" },
+        "MaxSize": { "Ref": "MaxSize" },
+        "DesiredCapacity": { "Ref": "DesiredCapacity" },
+        "LaunchTemplate": {
+          "LaunchTemplateId": { "Ref": "LaunchTemplate" },
+          "Version": { "Fn::GetAtt": ["LaunchTemplate", "LatestVersionNumber"] }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+             "Value": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                "nikbsoft-frontend-srvr-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+            "PropagateAtLaunch": true
+          }
+        ]
+      }
+    }
+
+  },
+
+  "Outputs": {
+    "ASGName": {
+      "Value": { "Ref": "AutoScalingGroup" }
+    }
+  }
+}
