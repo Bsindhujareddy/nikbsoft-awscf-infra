@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/thejeswarr6/nikbsoft-awscf-infra.git',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git',
                     credentialsId: 'github-cred'
             }
         }
