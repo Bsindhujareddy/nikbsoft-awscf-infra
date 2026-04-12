@@ -2,51 +2,93 @@ pipeline {
     agent any
 
     environment {
-        STACK_NAME = "nikbsoft-frontend-srvr-asg-stack-dev"
-        REGION = "us-east-1"
+        AWS_REGION = "us-east-1"
+        ACCOUNT_ID = "855983325095"
+
+        BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+
+        STACK_NAME = "nikbsoft-ecs-service-backend-dev"
     }
 
     stages {
 
-        stage('Checkout') {
+        // ----------------------------------
+        // 1. Checkout Application Code
+        // ----------------------------------
+        stage('Checkout App Repo') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git',
-                    credentialsId: 'github-cred'
+                git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-backend-app.git'
             }
         }
-        stage('Debug Files') {
-       steps {
-               sh '''
-                 pwd
-                 ls -la
-                  '''
-              }
-           }
-        stage('Validate Template') {
+
+        // ----------------------------------
+        // 2. Checkout Infra Repo
+        // ----------------------------------
+        stage('Checkout Infra Repo') {
             steps {
-                withAWS(credentials: 'aws-cred', region: "${REGION}") {
-                    sh '''
-                    aws cloudformation validate-template \
-                      --template-body file://EC2-Frontend-ASG/main.json
-                    '''
+                dir('infra') {
+                    git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git'
                 }
             }
         }
 
-        stage('Deploy Stack') {
+        // ----------------------------------
+        // 3. Login to ECR
+        // ----------------------------------
+        stage('ECR Login') {
+            steps {
+                sh '''
+                aws ecr get-login-password --region $AWS_REGION | \
+                docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
+            }
+        }
+        stage('build docker image and push') {
             steps {
                 withAWS(credentials: 'aws-cred', region: "${REGION}") {
                     sh '''
-                    cd EC2-Frontend-ASG
-                    aws cloudformation deploy \
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+					cd backend
+                    docker build -t backend-app .
+                    docker tag backend-app $BACKEND_REPO:$IMAGE_TAG
+					docker push $BACKEND_REPO:$IMAGE_TAG
+                    '''
+                }
+            }
+        }
+        // ----------------------------------
+        // 6. Update Parameters File
+        // ----------------------------------
+        stage('Update CF Parameters') {
+            steps {
+                script {
+                    sh """
+                    sed -i 's|IMAGE_URI_PLACEHOLDER|$BACKEND_REPO:$IMAGE_TAG|g' ECS-Backend-Service/dev.parameters.json
+                    """
+                }
+            }
+        }
+
+        // ----------------------------------
+        // 7. Deploy via CloudFormation
+        // ----------------------------------
+		
+		 stage('deploy ecs service ') {
+            steps {
+                withAWS(credentials: 'aws-cred', region: "${REGION}") {
+                    sh '''
+                    cd ECS-Backend-Service
+					aws cloudformation deploy \
                       --stack-name $STACK_NAME \
                       --template-file main.json \
-                      --parameter-overrides $(cat dev.parameters.json | jq -r 'to_entries|map("\\(.key)=\\(.value|tostring)")|.[]') \
+                      --parameter-overrides file://dev.parameters.json \
                       --capabilities CAPABILITY_NAMED_IAM
                     '''
                 }
             }
         }
+
     }
 }
