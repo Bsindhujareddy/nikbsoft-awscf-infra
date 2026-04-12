@@ -23,7 +23,7 @@
                         "",
                              [
                                 {"Ref":"ServiceName"},
-                                "-ECRRepo-Backend-", 
+                                "-ECR-Backend-", 
                                 {"Ref":"Environment"}
                             ]
                                  ]
@@ -42,7 +42,7 @@
                         "",
                              [
                                 {"Ref":"ServiceName"},
-                                "-ECRRepo-Frontend-", 
+                                "-ECR-Frontend-", 
                                 {"Ref":"Environment"}
                             ]
                                  ]
