@@ -16,9 +16,11 @@ pipeline {
         // ----------------------------------
         // 1. Checkout Application Code
         // ----------------------------------
-        stage('Checkout App Repo') {
+         stage('Checkout appcode') {
             steps {
-                git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-backend-app.git'
+                git branch: 'main',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-backend-app.git',
+                    credentialsId: 'github-cred'
             }
         }
 
@@ -27,11 +29,12 @@ pipeline {
         // ----------------------------------
         stage('Checkout Infra Repo') {
             steps {
-                dir('infra') {
-                    git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git'
-                }
+                git branch: 'main',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git',
+                    credentialsId: 'github-cred'
             }
         }
+
 
         // ----------------------------------
         // 3. Login to ECR
