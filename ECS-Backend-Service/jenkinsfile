@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "us-east-1"
+        ACCOUNT_ID = "855983325095"
+
+        BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+
+        STACK_NAME = "nikbsoft-ecs-service-backend-dev"
+    }
+
+    stages {
+
+        // ----------------------------------
+        // 1. Checkout Application Code
+        // ----------------------------------
+        stage('Checkout App Repo') {
+            steps {
+                git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-backend-app.git'
+            }
+        }
+
+        // ----------------------------------
+        // 2. Checkout Infra Repo
+        // ----------------------------------
+        stage('Checkout Infra Repo') {
+            steps {
+                dir('infra') {
+                    git credentialsId: 'git-creds', url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git'
+                }
+            }
+        }
+
+        // ----------------------------------
+        // 3. Login to ECR
+        // ----------------------------------
+        stage('ECR Login') {
+            steps {
+                sh '''
+                aws ecr get-login-password --region $AWS_REGION | \
+                docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
+            }
+        }
+
+        // ----------------------------------
+        // 4. Build Docker Image
+        // ----------------------------------
+        stage('Build Image') {
+            steps {
+                dir('backend') {
+                    sh '''
+					cd backend
+                    docker build -t backend-app .
+                    docker tag backend-app $BACKEND_REPO:$IMAGE_TAG
+                    '''
+                }
+            }
+        }
+
+        // ----------------------------------
+        // 5. Push to ECR
+        // ----------------------------------
+        stage('Push Image') {
+            steps {
+                sh '''
+                docker push $BACKEND_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        // ----------------------------------
+        // 6. Update Parameters File
+        // ----------------------------------
+        stage('Update CF Parameters') {
+            steps {
+                script {
+                    sh """
+                    sed -i 's|IMAGE_URI_PLACEHOLDER|$BACKEND_REPO:$IMAGE_TAG|g' ECS-Backend-Service/dev.parameters.json
+                    """
+                }
+            }
+        }
+
+        // ----------------------------------
+        // 7. Deploy via CloudFormation
+        // ----------------------------------
+        stage('Deploy ECS') {
+            steps {
+                sh '''
+				cd ECS-Backend-Service
+                aws cloudformation deploy \
+                  --stack-name $STACK_NAME \
+                  --template-file main.json \
+                  --parameter-overrides file://dev.parameters.json \
+                  --capabilities CAPABILITY_NAMED_IAM
+                '''
+            }
+        }
+    }
+}
