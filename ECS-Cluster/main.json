@@ -1,0 +1,96 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "ECR Repositories and ECS Cluster",
+
+  "Parameters": {
+    "Environment": {
+      "Type": "String",
+      "Default": "dev"
+    },
+     "ServiceName": {
+      "Type": "String",
+      "Default": "nikbsoft-app"
+    }
+  },
+
+  "Resources": {
+
+    "BackendECRRepository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-ECRRepo-Backend-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+        "ImageScanningConfiguration": {
+          "ScanOnPush": false
+        }
+      }
+    },
+
+    "FrontendECRRepository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-ECRRepo-Frontend-", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   },
+        "ImageScanningConfiguration": {
+          "ScanOnPush": false
+        }
+      }
+    },
+
+    "ECSCluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-ECS-Cluster", 
+                                {"Ref":"Environment"}
+                            ]
+                                 ]
+                   }
+      }
+    }
+
+  },
+
+  "Outputs": {
+
+    "BackendECRRepoURI": {
+      "Description": "Backend ECR Repository URI",
+      "Value": {
+        "Fn::GetAtt": ["BackendECRRepository", "RepositoryUri"]
+      }
+    },
+
+    "FrontendECRRepoURI": {
+      "Description": "Frontend ECR Repository URI",
+      "Value": {
+        "Fn::GetAtt": ["FrontendECRRepository", "RepositoryUri"]
+      }
+    },
+
+    "ECSClusterName": {
+      "Value": {
+        "Ref": "ECSCluster"
+      }
+    }
+  }
+}
