@@ -6,7 +6,7 @@ pipeline {
         ACCOUNT_ID = "855983325095"
 
         BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
-        IMAGE_TAG = latest
+        IMAGE_TAG = ${BUILD_NUMBER}
 
         STACK_NAME = "nikbsoft-ecs-service-backend-dev"
     }
@@ -67,6 +67,14 @@ pipeline {
                   '''
               }
            }
+        stage('Prepare CF Parameters') {
+        steps {
+               sh """
+                     sed -i 's|image-tag|${BUILD_NUMBER}|g' dev.parameters.json
+                     cat dev.parameters.json
+                """
+              }
+            }
         stage('Deploy ECS Service') {
             steps {
                 withAWS(credentials: 'aws-cred', region: "${REGION}") {
