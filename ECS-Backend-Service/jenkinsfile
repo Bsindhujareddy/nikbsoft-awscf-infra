@@ -29,6 +29,7 @@ pipeline {
                sh '''
                  pwd
                  ls -la
+                 ls -l backend
                   '''
               }
            }
@@ -66,7 +67,7 @@ pipeline {
                   '''
               }
            }
-           
+
         stage('Update CF Parameters') {
             steps {
                 script {
