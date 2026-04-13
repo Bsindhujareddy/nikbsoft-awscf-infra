@@ -24,7 +24,7 @@ pipeline {
             }
         }
         
-         stage('Debug Files') {
+         stage('Debug Files1') {
        steps {
                sh '''
                  pwd
@@ -43,7 +43,7 @@ pipeline {
             }
         }
         
-         stage('Debug Files') {
+         stage('Debug Files2') {
        steps {
                sh '''
                  pwd
