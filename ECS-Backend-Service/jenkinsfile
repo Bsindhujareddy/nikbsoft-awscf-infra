@@ -23,7 +23,15 @@ pipeline {
                     credentialsId: 'github-cred'
             }
         }
-
+        
+         stage('Debug Files') {
+       steps {
+               sh '''
+                 pwd
+                 ls -la
+                  '''
+              }
+           }
         // ----------------------------------
         // 2. Checkout Infra Repo
         // ----------------------------------
