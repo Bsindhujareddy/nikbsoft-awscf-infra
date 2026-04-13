@@ -34,7 +34,15 @@ pipeline {
                     credentialsId: 'github-cred'
             }
         }
-
+        
+         stage('Debug Files') {
+       steps {
+               sh '''
+                 pwd
+                 ls -la
+                  '''
+              }
+           }
 
         stage('build docker image and push') {
             steps {
@@ -60,6 +68,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('deploy ecs service ') {
             steps {
