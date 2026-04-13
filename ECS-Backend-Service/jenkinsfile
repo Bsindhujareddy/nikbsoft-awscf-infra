@@ -32,25 +32,6 @@ pipeline {
                   '''
               }
            }
-        // ----------------------------------
-        // 2. Checkout Infra Repo
-        // ----------------------------------
-        stage('Checkout Infra Repo') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git',
-                    credentialsId: 'github-cred'
-            }
-        }
-        
-         stage('Debug Files2') {
-       steps {
-               sh '''
-                 pwd
-                 ls -la
-                  '''
-              }
-           }
 
         stage('build docker image and push') {
             steps {
@@ -66,7 +47,26 @@ pipeline {
                 }
             }
         }
+        // ----------------------------------
+        // 2. Checkout Infra Repo
+        // ----------------------------------
+        stage('Checkout Infra Repo') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-awscf-infra.git',
+                    credentialsId: 'github-cred'
+            }
+        }
 
+         stage('Debug Files2') {
+       steps {
+               sh '''
+                 pwd
+                 ls -la
+                  '''
+              }
+           }
+           
         stage('Update CF Parameters') {
             steps {
                 script {
