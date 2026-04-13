@@ -6,7 +6,7 @@ pipeline {
         ACCOUNT_ID = "855983325095"
 
         BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG = latest
 
         STACK_NAME = "nikbsoft-ecs-service-backend-dev"
     }
@@ -67,27 +67,15 @@ pipeline {
                   '''
               }
            }
-
-        stage('Update CF Parameters') {
+        stage('Deploy ECS Service') {
             steps {
-                script {
-                    sh """
-                    sed -i 's|IMAGE_URI_PLACEHOLDER|$BACKEND_REPO:$IMAGE_TAG|g' ECS-Backend-Service/dev.parameters.json
-                    """
-                }
-            }
-        }
-
-
-        stage('deploy ecs service ') {
-            steps {
-                withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
+                withAWS(credentials: 'aws-cred', region: "${REGION}") {
                     sh '''
-                    cd ECS-Backend-Service
+                    cd EC2-Frontend-ASG
                     aws cloudformation deploy \
                       --stack-name $STACK_NAME \
                       --template-file main.json \
-                      --parameter-overrides file://dev.parameters.json \
+                      --parameter-overrides $(cat dev.parameters.json | jq -r 'to_entries|map("\\(.key)=\\(.value|tostring)")|.[]') \
                       --capabilities CAPABILITY_NAMED_IAM
                     '''
                 }
