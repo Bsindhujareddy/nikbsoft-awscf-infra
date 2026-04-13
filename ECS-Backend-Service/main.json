@@ -4,22 +4,28 @@
 
   "Parameters": {
     "ServiceName": { 
-        "Type": "String" 
+        "Type": "String",
+        "Default": ""
     },
     "Environment": { 
-        "Type": "String" 
+        "Type": "String",
+        "Default": ""
     },
     "ClusterName": {
-         "Type": "String" 
+         "Type": "String",
+         "Default": ""
         },
     "VpcSubnets": { 
-        "Type": "List<AWS::EC2::Subnet::Id>"
+        "Type": "List<AWS::EC2::Subnet::Id>",
+        "Default": ""
     },
     "SecurityGroup": { 
-        "Type": "AWS::EC2::SecurityGroup::Id" 
+        "Type": "AWS::EC2::SecurityGroup::Id",
+        "Default": ""
     },
     "BackendImage": { 
-        "Type": "String"
+        "Type": "String",
+        "Default": ""
      }
   },
 
