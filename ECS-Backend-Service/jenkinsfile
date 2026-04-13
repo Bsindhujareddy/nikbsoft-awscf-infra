@@ -36,47 +36,21 @@ pipeline {
         }
 
 
-        // ----------------------------------
-        // 3. Login to ECR
-        // ----------------------------------
-        stage('ECR Login') {
+        stage('build docker image and push') {
             steps {
-                sh '''
-                aws ecr get-login-password --region $AWS_REGION | \
-                docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-                '''
-            }
-        }
-
-        // ----------------------------------
-        // 4. Build Docker Image
-        // ----------------------------------
-        stage('Build Image') {
-            steps {
-                dir('backend') {
+                withAWS(credentials: 'aws-cred', region: "${REGION}") {
                     sh '''
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 					cd backend
                     docker build -t backend-app .
                     docker tag backend-app $BACKEND_REPO:$IMAGE_TAG
+					docker push $BACKEND_REPO:$IMAGE_TAG
                     '''
                 }
             }
         }
-
-        // ----------------------------------
-        // 5. Push to ECR
-        // ----------------------------------
-        stage('Push Image') {
-            steps {
-                sh '''
-                docker push $BACKEND_REPO:$IMAGE_TAG
-                '''
-            }
-        }
-
-        // ----------------------------------
-        // 6. Update Parameters File
-        // ----------------------------------
+------------------------------
         stage('Update CF Parameters') {
             steps {
                 script {
@@ -86,10 +60,6 @@ pipeline {
                 }
             }
         }
-
-        // ----------------------------------
-        // 7. Deploy via CloudFormation
-        // ----------------------------------
         stage('Deploy ECS') {
             steps {
                 sh '''
