@@ -19,7 +19,7 @@ pipeline {
          stage('Checkout appcode') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/Bsindhujareddy/nikbsoft-frontend-webapp.git',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-frontend-webapp-container.git',
                     credentialsId: 'github-cred'
             }
         }
