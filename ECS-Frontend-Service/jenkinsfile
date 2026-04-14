@@ -5,10 +5,10 @@ pipeline {
         AWS_REGION = "us-east-1"
         ACCOUNT_ID = "855983325095"
 
-        BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
+        FRONTEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-frontend-dev"
         IMAGE_TAG = "${BUILD_NUMBER}"
 
-        STACK_NAME = "nikbsoft-ecs-service-backend-dev"
+        STACK_NAME = "nikbsoft-ecs-service-frontend-dev"
     }
 
     stages {
@@ -19,7 +19,7 @@ pipeline {
          stage('Checkout appcode') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/Bsindhujareddy/nikbsoft-backend-app-container.git',
+                    url: 'https://github.com/Bsindhujareddy/nikbsoft-frontend-webapp.git',
                     credentialsId: 'github-cred'
             }
         }
@@ -41,16 +41,14 @@ pipeline {
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 					cd backend
-                    docker build -t backend-app .
-                    docker tag backend-app $BACKEND_REPO:$IMAGE_TAG
+                    docker build -t frontend-app .
+                    docker tag backend-app $FRONTEND_REPO:$IMAGE_TAG
 					docker push $BACKEND_REPO:$IMAGE_TAG
                     '''
                 }
             }
         }
-        // ----------------------------------
-        // 2. Checkout Infra Repo
-        // ----------------------------------
+        
         stage('Checkout Infra Repo') {
             steps {
                 git branch: 'main',
@@ -67,10 +65,10 @@ pipeline {
                   '''
               }
            }
-        stage('Prepare CF Parameters') {
+        stage('updatate image tage in parameters') {
         steps {
                sh """
-                     cd ECS-Backend-Service
+                     cd ECS-Frontend-Service
                      sed -i 's|image-tag|${BUILD_NUMBER}|g' dev.parameters.json
                      cat dev.parameters.json
                 """
@@ -80,7 +78,7 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-cred', region: "${AWS_REGION}") {
                     sh '''
-                    cd ECS-Backend-Service
+                    cd ECS-Frontend-Service
                     aws cloudformation deploy \
                       --stack-name $STACK_NAME \
                       --template-file main.json \
