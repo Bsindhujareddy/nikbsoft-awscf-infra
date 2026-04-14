@@ -42,7 +42,7 @@ pipeline {
                     docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 					cd frontend
                     docker build -t frontend-app .
-                    docker tag backend-app $FRONTEND_REPO:$IMAGE_TAG
+                    docker tag frontend-app $FRONTEND_REPO:$IMAGE_TAG
 					docker push $BACKEND_REPO:$IMAGE_TAG
                     '''
                 }
