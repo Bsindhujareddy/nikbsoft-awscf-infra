@@ -24,7 +24,7 @@ pipeline {
             }
         }
         
-         stage('Debug Files1') {
+         stage('List Files1') {
        steps {
                sh '''
                  pwd
@@ -57,7 +57,7 @@ pipeline {
             }
         }
 
-         stage('Debug Files2') {
+         stage('List Files2') {
        steps {
                sh '''
                  pwd
