@@ -29,7 +29,7 @@ pipeline {
                sh '''
                  pwd
                  ls -la
-                 ls -l backend
+                 ls -l frontend
                   '''
               }
            }
@@ -40,7 +40,7 @@ pipeline {
                     sh '''
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-					cd backend
+					cd frontend
                     docker build -t frontend-app .
                     docker tag backend-app $FRONTEND_REPO:$IMAGE_TAG
 					docker push $BACKEND_REPO:$IMAGE_TAG
