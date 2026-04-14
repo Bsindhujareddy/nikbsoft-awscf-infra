@@ -6,7 +6,7 @@ pipeline {
         ACCOUNT_ID = "855983325095"
 
         BACKEND_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nikbsoft-ecrrepo-backend-dev"
-        IMAGE_TAG = ${BUILD_NUMBER}
+        IMAGE_TAG = "${BUILD_NUMBER}"
 
         STACK_NAME = "nikbsoft-ecs-service-backend-dev"
     }
