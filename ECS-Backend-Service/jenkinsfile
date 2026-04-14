@@ -70,6 +70,7 @@ pipeline {
         stage('Prepare CF Parameters') {
         steps {
                sh """
+                     cd ECS-Backend-Service
                      sed -i 's|image-tag|${BUILD_NUMBER}|g' dev.parameters.json
                      cat dev.parameters.json
                 """
@@ -79,7 +80,7 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-cred', region: "${REGION}") {
                     sh '''
-                    cd EC2-Frontend-ASG
+                    cd ECS-Backend-Service
                     aws cloudformation deploy \
                       --stack-name $STACK_NAME \
                       --template-file main.json \
