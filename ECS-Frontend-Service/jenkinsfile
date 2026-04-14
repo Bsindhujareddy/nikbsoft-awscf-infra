@@ -43,7 +43,7 @@ pipeline {
 					cd frontend
                     docker build -t frontend-app .
                     docker tag frontend-app $FRONTEND_REPO:$IMAGE_TAG
-					docker push $BACKEND_REPO:$IMAGE_TAG
+					docker push $FRONTEND_REPO:$IMAGE_TAG
                     '''
                 }
             }
