@@ -1,0 +1,8 @@
+{
+  "Environment": "dev",
+  "ServiceName": "nikbsoft-ecs-frontend",
+  "VpcSubnets": "subnet-0e52891d58f9ddb2f,subnet-01c277af5daee818b",
+  "SecurityGroup": "sg-016f7ff6b60b8f903",
+  "ClusterName": "nikbsoft-ecs-clusterdev",
+  "BackendImage": "855983325095.dkr.ecr.us-east-1.amazonaws.com/nikbsoft-ecrrepo-frontend-dev:image-tag"
+}
