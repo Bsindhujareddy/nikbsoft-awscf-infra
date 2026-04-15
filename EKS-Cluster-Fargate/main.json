@@ -161,7 +161,7 @@
           "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
         },
         "Subnets": {
-          "Ref": "PublicSubnetIds"
+          "Ref": "PrivateSubnetIds"
         },
         "Selectors": [
           {
