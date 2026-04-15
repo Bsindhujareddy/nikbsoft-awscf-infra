@@ -2,5 +2,6 @@
   "Environment": "dev",
   "ServiceName": "nikbsoft-eks",
   "PublicSubnetIds": "subnet-0e52891d58f9ddb2f,subnet-01c277af5daee818b",
-  "PrivateSubnetIds":"subnet-0ae6d452f2f0761c0,subnet-0eba5b55578fdfc8a"
+  "PrivateSubnetIds":"subnet-0ae6d452f2f0761c0,subnet-0eba5b55578fdfc8a",
+  "VpcId":"vpc-06a98ae800a6d7b2f"
 }
