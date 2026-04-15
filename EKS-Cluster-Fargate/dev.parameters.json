@@ -1,0 +1,5 @@
+{
+  "Environment": "dev",
+  "ServiceName": "nikbsoft-eks",
+  "SubnetIds": "subnet-0e52891d58f9ddb2f,subnet-01c277af5daee818b"
+}
