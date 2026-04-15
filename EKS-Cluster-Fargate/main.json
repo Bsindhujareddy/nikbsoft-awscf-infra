@@ -11,7 +11,11 @@
       "Type": "String",
       "Default": ""
     },
-    "SubnetIds": {
+    "PublicSubnetIds": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Default": ""
+    },
+    "PrivateSubnetIds": {
       "Type": "List<AWS::EC2::Subnet::Id>",
       "Default": ""
     }
@@ -70,7 +74,7 @@
         },
         "ResourcesVpcConfig": {
           "SubnetIds": {
-            "Ref": "SubnetIds"
+            "Ref": "PublicSubnetIds"
           }
         }
       }
@@ -128,7 +132,7 @@
           "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
         },
         "Subnets": {
-          "Ref": "SubnetIds"
+          "Ref": "PublicSubnetIds"
         },
         "Selectors": [
           {
