@@ -1,0 +1,129 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "EKS Cluster with Fargate Profile",
+
+  "Parameters": {
+    "ClusterName": {
+      "Type": "String",
+      "Default": "nikbsoft-eks-cluster"
+    },
+    "SubnetIds": {
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    }
+  },
+
+  "Resources": {
+
+    "EKSClusterRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-cluster-role-", 
+                                {"Ref":"Environment"}
+                            ]
+                            
+                                 ]
+                   },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "eks.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+        ]
+      }
+    },
+
+    "EKSCluster": {
+      "Type": "AWS::EKS::Cluster",
+      "Properties": {
+        "Name":  {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-cluster-", 
+                                {"Ref":"Environment"}
+                            ]
+                            
+                                 ]
+                   },
+        "RoleArn": {
+          "Fn::GetAtt": ["EKSClusterRole", "Arn"]
+        },
+        "ResourcesVpcConfig": {
+          "SubnetIds": {
+            "Ref": "SubnetIds"
+          }
+        }
+      }
+    },
+
+    "FargatePodExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "${ClusterName}-FargatePodRole"
+        },
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "eks-fargate-pods.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+        ]
+      }
+    },
+
+    "FargateProfile": {
+      "Type": "AWS::EKS::FargateProfile",
+      "Properties": {
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
+        "FargateProfileName": "default-profile",
+        "PodExecutionRoleArn": {
+          "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
+        },
+        "Subnets": {
+          "Ref": "SubnetIds"
+        },
+        "Selectors": [
+          {
+            "Namespace": "backend"
+          },
+          {
+            "Namespace": "frontend"
+          }
+        ]
+      }
+    }
+  },
+
+  "Outputs": {
+    "ClusterName": {
+      "Value": {
+        "Ref": "EKSCluster"
+      }
+    }
+  }
+}
