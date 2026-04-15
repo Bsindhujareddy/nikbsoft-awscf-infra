@@ -38,7 +38,7 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-cred', region: "${REGION}") {
                     sh '''
-                    cd ECS-Cluster
+                    cd EKS-Cluster-Fargate
                     aws cloudformation deploy \
                       --stack-name $STACK_NAME \
                       --template-file main.json \
