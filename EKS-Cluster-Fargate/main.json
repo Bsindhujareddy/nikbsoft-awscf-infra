@@ -3,12 +3,17 @@
   "Description": "EKS Cluster with Fargate Profile",
 
   "Parameters": {
-    "ClusterName": {
+    "Environment": {
       "Type": "String",
-      "Default": "nikbsoft-eks-cluster"
+      "Default": ""
+    },
+     "ServiceName": {
+      "Type": "String",
+      "Default": ""
     },
     "SubnetIds": {
-      "Type": "List<AWS::EC2::Subnet::Id>"
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Default": ""
     }
   },
 
@@ -74,9 +79,17 @@
     "FargatePodExecutionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": {
-          "Fn::Sub": "${ClusterName}-FargatePodRole"
-        },
+        "RoleName":  {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-pod-execution-role-", 
+                                {"Ref":"Environment"}
+                            ]
+                            
+                                 ]
+                   },
         "AssumeRolePolicyDocument": {
           "Statement": [
             {
@@ -100,7 +113,17 @@
         "ClusterName": {
           "Ref": "EKSCluster"
         },
-        "FargateProfileName": "default-profile",
+        "FargateProfileName":   {
+                      "Fn::Join": [
+                        "",
+                             [
+                                {"Ref":"ServiceName"},
+                                "-fargate-profile-", 
+                                {"Ref":"Environment"}
+                            ]
+                            
+                                 ]
+                   },
         "PodExecutionRoleArn": {
           "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
         },
