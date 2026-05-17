@@ -172,6 +172,42 @@
           }
         ]
       }
+    },
+	 "IngressFargateProfile": {
+      "Type": "AWS::EKS::FargateProfile",
+
+      "DependsOn": "EKSCluster",
+
+      "Properties": {
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
+
+        "FargateProfileName": {
+          "Fn::Join": [
+            "",
+            [
+              { "Ref": "ServiceName" },
+              "-ingress-profile-",
+              { "Ref": "Environment" }
+            ]
+          ]
+        },
+
+        "PodExecutionRoleArn": {
+          "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
+        },
+
+        "Subnets": {
+          "Ref": "PublicSubnetIds"
+        },
+
+        "Selectors": [
+          {
+            "Namespace": "ingress"
+          }
+        ]
+      }
     }
   },
 
@@ -179,6 +215,16 @@
     "ClusterName": {
       "Value": {
         "Ref": "EKSCluster"
+      }
+    },
+	 "ClusterSecurityGroup": {
+      "Value": {
+        "Ref": "EKSClusterSecurityGroup"
+      }
+    },
+	 "FargateExecutionRole": {
+      "Value": {
+        "Fn::GetAtt": ["FargatePodExecutionRole", "Arn"]
       }
     }
   }
