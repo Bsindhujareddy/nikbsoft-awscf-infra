@@ -199,7 +199,7 @@
         },
 
         "Subnets": {
-          "Ref": "PublicSubnetIds"
+          "Ref": "PrivateSubnetIds"
         },
 
         "Selectors": [
