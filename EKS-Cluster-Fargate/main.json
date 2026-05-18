@@ -170,7 +170,7 @@
         ]
       }
     },
-	 "nikbsoftappFargateProfile": {
+	 "nikbsoftingressFargateProfile": {
       "Type": "AWS::EKS::FargateProfile",
 
       "DependsOn": "EKSCluster",
