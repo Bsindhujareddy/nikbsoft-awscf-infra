@@ -140,7 +140,7 @@
       }
     },
 
-    "FargateProfile": {
+    "KubesystemFargateProfile": {
       "Type": "AWS::EKS::FargateProfile",
       "Properties": {
         "ClusterName": {
@@ -150,7 +150,7 @@
                       "Fn::Join": [
                         "",
                              [
-                                {"Ref":"ServiceName"},
+                                "kube-system",
                                 "-fargate-profile-", 
                                 {"Ref":"Environment"}
                             ]
@@ -165,15 +165,12 @@
         },
         "Selectors": [
           {
-            "Namespace": "backend"
-          },
-          {
-            "Namespace": "frontend"
+            "Namespace": "kube-system"
           }
         ]
       }
     },
-	 "IngressFargateProfile": {
+	 "nikbsoftappFargateProfile": {
       "Type": "AWS::EKS::FargateProfile",
 
       "DependsOn": "EKSCluster",
